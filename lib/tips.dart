@@ -1,165 +1,110 @@
+import 'package:material_ui/material_ui.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'ride_result.dart';
+import 'scoot_ui.dart';
 
-class TipsPage extends StatelessWidget {
-  final VoidCallback onBack;
-  final VoidCallback onNext;
-
-  const TipsPage({
+class RideRecommendations extends StatelessWidget {
+  const RideRecommendations({
     super.key,
-    required this.onBack,
-    required this.onNext,
+    required this.evaluation,
+    required this.onContinue,
   });
 
-  static const Color green = Color(0xFF16A991);
-  static const Color darkText = Color(0xFF172B2B);
-  static const Color greyText = Color(0xFF657070);
+  final RideEvaluation evaluation;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final screenHeight = constraints.maxHeight;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final readinessAdvice = evaluation.readinessAdvice;
+    final recommendations = [
+      if (readinessAdvice.isEmpty) ...[
+        'Отдохните перед поездкой, если чувствуете усталость.',
+        'После употребления алкоголя выберите другой способ добраться.',
+      ] else
+        ...readinessAdvice,
+      if (!evaluation.passedTraffic)
+        'Перед поездкой разберите ошибки по ПДД и повторите проверку.',
+      'Уступайте пешеходам и спешивайтесь на пешеходных переходах.',
+    ];
 
-
-            final contentWidth = screenWidth.clamp(0.0, 480.0);
-
-            final scale = (contentWidth / 375).clamp(0.85, 1.2);
-
-            final horizontalPadding =
-                (contentWidth * 0.06).clamp(16.0, 28.0);
-
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: screenHeight,
-                ),
-                child: Center(
-                  child: SizedBox(
-                    width: contentWidth,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalPadding,
-                        vertical: 12 * scale,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+    return ScootCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 132,
+              height: 100,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: BorderRadius.circular(56),
+              ),
+              child: Icon(
+                Icons.lightbulb_rounded,
+                size: 60,
+                color: colors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Semantics(
+            container: true,
+            headingLevel: 2,
+            child: Text(
+              'Рекомендации для вас',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  for (final (index, recommendation) in recommendations.indexed)
+                    Padding(
+                      padding: EdgeInsets.only(top: index == 0 ? 0 : 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              onPressed: onBack,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 21 * scale,
-                                color: darkText,
-                              ),
-                            ),
+                          Icon(
+                            index < readinessAdvice.length
+                                ? Icons.info_outline_rounded
+                                : Icons.check_circle_rounded,
+                            size: 20,
+                            color: colors.primary,
                           ),
-
-
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-
-                              SizedBox(
-                                width: 150 * scale,
-                                height: 150 * scale,
-                                child: SvgPicture.asset(
-                                  'assets/svg/lamp.svg',
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-
-                              SizedBox(height: 20 * scale),
-
-
-                              Text(
-                                'Советы для вас',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 18 * scale,
-                                  fontWeight: FontWeight.bold,
-                                  color: darkText,
-                                ),
-                              ),
-
-                              SizedBox(height: 22 * scale),
-
-
-                              Text(
-                                'Рекомендуем сделать\n'
-                                'небольшой перерыв, если\n'
-                                'вы чувствуете усталость.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14 * scale,
-                                  height: 1.45,
-                                  color: greyText,
-                                ),
-                              ),
-
-                              SizedBox(height: 20 * scale),
-
-
-                              Text(
-                                'Помните: хорошее\n'
-                                'самочувствие — залог\n'
-                                'безопасной поездки!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14 * scale,
-                                  height: 1.45,
-                                  color: greyText,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: 100 * scale),
-
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 45 * scale,
-                            child: ElevatedButton(
-                              onPressed: onNext,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: green,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                              child: Text(
-                                'Понятно',
-                                style: TextStyle(
-                                  fontSize: 14 * scale,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              recommendation,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colors.onPrimaryContainer,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          FilledButton(
+            onPressed: onContinue,
+            style: FilledButton.styleFrom(shape: const StadiumBorder()),
+            child: const Text('Понятно'),
+          ),
+        ],
       ),
     );
   }
